@@ -9,25 +9,20 @@ using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace pickytest
 {
-    public class RequestContentValidationPriorityTests
-      : IClassFixture<WebApplicationFactory<pickypicky.Startup>>,
-        IClassFixture<WebApplicationFactory<pickybuthelpful.Startup>>
+    public class DefaultRequestContentValidationPriorityTests
+      : IClassFixture<WebApplicationFactory<pickypicky.Startup>>
     {
         private readonly WebApplicationFactory<pickypicky.Startup> pickypickyFactory;
-        private readonly WebApplicationFactory<pickybuthelpful.Startup> pickybuthelpfulFactory;
 
-        public RequestContentValidationPriorityTests(
-              WebApplicationFactory<pickypicky.Startup> pickypickyFactory,
-              WebApplicationFactory<pickybuthelpful.Startup> pickybuthelpfulFactory
+        public DefaultRequestContentValidationPriorityTests(
+              WebApplicationFactory<pickypicky.Startup> pickypickyFactory
             ) {
             this.pickypickyFactory = pickypickyFactory;
-            this.pickybuthelpfulFactory = pickybuthelpfulFactory;
         }
 
-        [Theory]
-        [MemberData(nameof(ClientFactories))]
+        [Fact]
         public async Task I_can_put_and_get_things_if_they_are_json() {
-          using (var client = clientFactory.CreateClient()) {
+          using (var client = pickypickyFactory.CreateClient()) {
             var putResponse = await client.PutAsync("/api/values/3", new StringContent("\"value3\"", Encoding.UTF8, "application/json"));
             putResponse.EnsureSuccessStatusCode();
             var getResponse = await client.GetAsync("/api/values/3");
@@ -37,8 +32,7 @@ namespace pickytest
           }
         }
 
-        [Theory]
-        [MemberData(nameof(ClientFactories))]
+        [Fact]
         public async Task Putting_an_unsupported_media_type_elicits_an_HTTP_415_code() {
           using (var client = pickypickyFactory.CreateClient()) {
             var putResponse = await client.PutAsync("/api/values/4", new StringContent("\"value3\"", Encoding.UTF8, "application/gunk"));
